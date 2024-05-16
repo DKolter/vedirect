@@ -19,10 +19,7 @@ impl TextReader {
 
     pub fn process_byte(&mut self, byte: u8) -> Option<TextRecord> {
         let current_state = std::mem::replace(&mut self.state, TextReaderState::Checksum);
-
-        if !self.is_checksum_mode() {
-            self.checksum = self.checksum.wrapping_add(byte);
-        }
+        self.checksum = self.checksum.wrapping_add(byte);
 
         match (current_state, byte) {
             (TextReaderState::RecordName(name), b'\t') => {
