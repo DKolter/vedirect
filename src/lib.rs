@@ -8,14 +8,14 @@ mod text;
 mod tests;
 
 pub enum VedirectReader {
-    Idle,
+    Idle(u8),
     TextReader(TextReader),
     HexReader(HexReader),
 }
 
 impl VedirectReader {
     pub fn new() -> VedirectReader {
-        VedirectReader::Idle
+        VedirectReader::Idle(0)
     }
 
     pub fn process_byte(&mut self, byte: u8) -> Option<VedirectRecord> {
@@ -25,20 +25,22 @@ impl VedirectReader {
                 *self = VedirectReader::HexReader(HexReader::new());
                 None
             }
-            Self::Idle if byte == b'\n' => {
-                println!("Switching to text reader");
-                *self = Self::TextReader(TextReader::new());
+            Self::Idle(ref mut checksum) => {
+                *checksum = checksum.wrapping_add(byte);
+                if byte == b'\n' {
+                    println!("Switching to text reader");
+                    *self = Self::TextReader(TextReader::new(*checksum));
+                }
                 None
             }
             Self::TextReader(reader) => reader.process_byte(byte).map(|record| {
-                *self = VedirectReader::Idle;
+                *self = VedirectReader::Idle(0);
                 VedirectRecord::TextRecord(record)
             }),
             Self::HexReader(reader) => reader.process_byte(byte).map(|record| {
-                *self = VedirectReader::Idle;
+                *self = VedirectReader::Idle(0);
                 VedirectRecord::HexRecord(record)
             }),
-            _ => None,
         }
     }
 

@@ -9,9 +9,9 @@ pub struct TextReader {
 }
 
 impl TextReader {
-    pub fn new() -> TextReader {
+    pub fn new(checksum: u8) -> TextReader {
         TextReader {
-            checksum: 0,
+            checksum,
             state: TextReaderState::RecordName(String::new()),
             record: TextRecord::new(),
         }
