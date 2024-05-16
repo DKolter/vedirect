@@ -3,15 +3,13 @@ pub use record::TextRecord;
 mod record;
 
 pub struct TextReader {
-    checksum: u8,
     state: TextReaderState,
     record: TextRecord,
 }
 
 impl TextReader {
-    pub fn new(checksum: u8) -> TextReader {
+    pub fn new() -> TextReader {
         TextReader {
-            checksum,
             state: TextReaderState::RecordName(String::new()),
             record: TextRecord::new(),
         }
@@ -19,7 +17,6 @@ impl TextReader {
 
     pub fn process_byte(&mut self, byte: u8) -> Option<TextRecord> {
         let current_state = std::mem::replace(&mut self.state, TextReaderState::Checksum);
-        self.checksum = self.checksum.wrapping_add(byte);
 
         match (current_state, byte) {
             (TextReaderState::RecordName(name), b'\t') => {
@@ -48,11 +45,7 @@ impl TextReader {
                 self.state = TextReaderState::RecordValue(name, value);
                 None
             }
-            (TextReaderState::Checksum, byte) => {
-                println!("Received checksum: {}", byte);
-                println!("Calculated checksum: {}", self.checksum);
-                Some(self.record.take())
-            }
+            (TextReaderState::Checksum, _) => Some(self.record.take()),
         }
     }
 

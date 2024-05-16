@@ -7,49 +7,82 @@ mod text;
 #[cfg(test)]
 mod tests;
 
-pub enum VedirectReader {
-    Idle(u8),
-    TextReader(TextReader),
-    HexReader(HexReader),
+pub struct VedirectReader {
+    checksum: u8,
+    state: VedirectReaderState,
 }
 
 impl VedirectReader {
     pub fn new() -> VedirectReader {
-        VedirectReader::Idle(0)
+        Self {
+            checksum: 0,
+            state: VedirectReaderState::Idle,
+        }
     }
 
     pub fn process_byte(&mut self, byte: u8) -> Option<VedirectRecord> {
-        match self {
+        let current_state = std::mem::take(&mut self.state);
+        match current_state {
             _ if byte == b':' && !self.is_text_checksum() => {
                 println!("Switching to hex reader");
-                *self = VedirectReader::HexReader(HexReader::new());
+                self.state = VedirectReaderState::HexReader(HexReader::new());
                 None
             }
-            Self::Idle(ref mut checksum) => {
-                *checksum = checksum.wrapping_add(byte);
+            VedirectReaderState::Idle => {
+                self.checksum = self.checksum.wrapping_add(byte);
                 if byte == b'\n' {
                     println!("Switching to text reader");
-                    *self = Self::TextReader(TextReader::new(*checksum));
+                    self.state = VedirectReaderState::TextReader(TextReader::new());
                 }
                 None
             }
-            Self::TextReader(reader) => reader.process_byte(byte).map(|record| {
-                *self = VedirectReader::Idle(0);
-                VedirectRecord::TextRecord(record)
-            }),
-            Self::HexReader(reader) => reader.process_byte(byte).map(|record| {
-                *self = VedirectReader::Idle(0);
-                VedirectRecord::HexRecord(record)
-            }),
+            VedirectReaderState::TextReader(mut reader) => {
+                self.checksum = self.checksum.wrapping_add(byte);
+                let record = reader.process_byte(byte);
+                match record {
+                    Some(record) => {
+                        println!("Checksum: {}", self.checksum);
+                        self.state = VedirectReaderState::Idle;
+                        self.checksum = 0;
+                        Some(VedirectRecord::TextRecord(record))
+                    }
+                    None => {
+                        self.state = VedirectReaderState::TextReader(reader);
+                        None
+                    }
+                }
+            }
+            VedirectReaderState::HexReader(mut reader) => {
+                let record = reader.process_byte(byte);
+                match record {
+                    Some(record) => {
+                        self.state = VedirectReaderState::Idle;
+                        self.checksum = 0;
+                        Some(VedirectRecord::HexRecord(record))
+                    }
+                    None => {
+                        self.state = VedirectReaderState::HexReader(reader);
+                        None
+                    }
+                }
+            }
         }
     }
 
     fn is_text_checksum(&self) -> bool {
-        match self {
-            Self::TextReader(text_reader) => text_reader.is_checksum_mode(),
+        match &self.state {
+            VedirectReaderState::TextReader(text_reader) => text_reader.is_checksum_mode(),
             _ => false,
         }
     }
+}
+
+#[derive(Default)]
+pub enum VedirectReaderState {
+    #[default]
+    Idle,
+    TextReader(TextReader),
+    HexReader(HexReader),
 }
 
 #[derive(Debug)]
