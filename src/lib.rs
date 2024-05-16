@@ -21,10 +21,12 @@ impl VedirectReader {
     pub fn process_byte(&mut self, byte: u8) -> Option<VedirectRecord> {
         match self {
             _ if byte == b':' && !self.is_text_checksum() => {
+                println!("Switching to hex reader");
                 *self = VedirectReader::HexReader(HexReader::new());
                 None
             }
             Self::Idle if byte == b'\n' => {
+                println!("Switching to text reader");
                 *self = Self::TextReader(TextReader::new());
                 None
             }
