@@ -26,7 +26,6 @@ impl TextReader {
 
         match (current_state, byte) {
             (TextReaderState::RecordName(name), b'\t') => {
-                println!("Recorded text name: {name}");
                 self.state = match name.as_str() {
                     "CHECKSUM" => TextReaderState::Checksum,
                     _ => TextReaderState::RecordValue(name, String::new()),
@@ -38,8 +37,11 @@ impl TextReader {
                 self.state = TextReaderState::RecordName(name);
                 None
             }
+            (TextReaderState::RecordValue(name, value), b'\r') => {
+                self.state = TextReaderState::RecordValue(name, value);
+                None
+            }
             (TextReaderState::RecordValue(name, value), b'\n') => {
-                println!("Recorded text name and value: {name} = {value}");
                 self.state = TextReaderState::RecordName(String::new());
                 self.record.add_name_value(name, value);
                 None
