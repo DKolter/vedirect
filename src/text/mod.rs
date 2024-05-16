@@ -34,7 +34,7 @@ impl TextReader {
                 None
             }
             (TextReaderState::RecordName(mut name), byte) => {
-                name.push(byte as char);
+                name.push((byte as char).to_ascii_uppercase());
                 self.state = TextReaderState::RecordName(name);
                 None
             }
@@ -45,7 +45,7 @@ impl TextReader {
                 None
             }
             (TextReaderState::RecordValue(name, mut value), byte) => {
-                value.push(byte as char);
+                value.push((byte as char).to_ascii_uppercase());
                 self.state = TextReaderState::RecordValue(name, value);
                 None
             }
