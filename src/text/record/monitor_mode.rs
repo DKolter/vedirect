@@ -1,4 +1,4 @@
-use super::record::TextRecordError;
+use super::TextRecordError;
 
 #[derive(Debug)]
 pub enum MonitorMode {

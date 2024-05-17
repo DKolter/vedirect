@@ -1,11 +1,26 @@
-use super::{
-    device_mode::DeviceMode, monitor_mode::MonitorMode, mppt_mode::MpptMode, product_id::ProductId,
-};
+use charger_status::ChargerStatus;
+use device_mode::DeviceMode;
+use error_code::ErrorCode;
+use monitor_mode::MonitorMode;
+use mppt_mode::MpptMode;
+use off_reason::OffReason;
+use product_id::ProductId;
+use warning_alarm_reason::WarningAlarmReason;
+
+mod charger_status;
+mod device_mode;
+mod error_code;
+mod monitor_mode;
+mod mppt_mode;
+mod off_reason;
+mod product_id;
+mod warning_alarm_reason;
 
 #[derive(Debug)]
 pub enum TextRecordError {
     UnknownField,
     ParseError,
+    ChecksumError,
 }
 
 #[derive(Debug, Default)]
@@ -161,8 +176,8 @@ impl TextRecord {
             "TTG" => self.ttg = parse_number_maybe_triple_dash(&value)?,
             "ALARM" => self.alarm = Some(parse_on_off(&value)?),
             "RELAY" => self.relay = Some(parse_on_off(&value)?),
-            "AR" => self.ar = Some(parse_warning_alarm_reason(&value)?),
-            "OR" => self.or = Some(parse_off_reason(&value)?),
+            "AR" => self.ar = Some(WarningAlarmReason::parse(&value)?),
+            "OR" => self.or = Some(OffReason::parse(&value)?),
             "H1" => self.h1 = parse_number_maybe_triple_dash(&value)?,
             "H2" => self.h2 = parse_number_maybe_triple_dash(&value)?,
             "H3" => self.h3 = parse_number_maybe_triple_dash(&value)?,
@@ -186,8 +201,8 @@ impl TextRecord {
             "H21" => self.h21 = Some(parse_number(&value)?),
             "H22" => self.h22 = Some(parse_number(&value)?),
             "H23" => self.h23 = Some(parse_number(&value)?),
-            "ERR" => self.err = Some(parse_error_code(&value)?),
-            "CS" => self.cs = Some(parse_charger_status(&value)?),
+            "ERR" => self.err = Some(ErrorCode::parse(&value)?),
+            "CS" => self.cs = Some(ChargerStatus::parse(&value)?),
             "BMV" => self.bmv = Some(value),
             "FW" => self.fw = Some(value),
             "FWE" => self.fwe = Some(value),
@@ -198,7 +213,7 @@ impl TextRecord {
             "AC_OUT_V" => self.ac_out_v = Some(parse_number(&value)?),
             "AC_OUT_I" => self.ac_out_i = Some(parse_number(&value)?),
             "AC_OUT_S" => self.ac_out_s = Some(parse_number(&value)?),
-            "WARN" => self.warn = Some(parse_warning_alarm_reason(&value)?),
+            "WARN" => self.warn = Some(WarningAlarmReason::parse(&value)?),
             "MPPT" => self.mppt = Some(MpptMode::parse(&value)?),
             "MON" => self.mon = Some(MonitorMode::parse(&value)?),
             "DC_IN_V" => self.dc_in_v = Some(parse_number(&value)?),
@@ -232,161 +247,4 @@ fn parse_number_maybe_triple_dash(value: &str) -> Result<Option<i32>, TextRecord
         "---" => None,
         _ => Some(value.parse().map_err(|_| TextRecordError::ParseError)?),
     })
-}
-
-fn parse_warning_alarm_reason(value: &str) -> Result<WarningAlarmReason, TextRecordError> {
-    let value: u32 = value.parse().map_err(|_| TextRecordError::ParseError)?;
-
-    Ok(WarningAlarmReason {
-        low_voltage: value & 1 != 0,
-        high_voltage: value & 2 != 0,
-        low_soc: value & 4 != 0,
-        low_starter_voltage: value & 8 != 0,
-        high_starter_voltage: value & 16 != 0,
-        low_temperature: value & 32 != 0,
-        high_temperature: value & 64 != 0,
-        mid_voltage: value & 128 != 0,
-        overload: value & 256 != 0,
-        dc_ripple: value & 512 != 0,
-        low_vac_out: value & 1024 != 0,
-        high_vac_out: value & 2048 != 0,
-        short_circuit: value & 4096 != 0,
-        bms_lockout: value & 8192 != 0,
-    })
-}
-
-#[derive(Debug)]
-pub struct WarningAlarmReason {
-    pub low_voltage: bool,
-    pub high_voltage: bool,
-    pub low_soc: bool,
-    pub low_starter_voltage: bool,
-    pub high_starter_voltage: bool,
-    pub low_temperature: bool,
-    pub high_temperature: bool,
-    pub mid_voltage: bool,
-    pub overload: bool,
-    pub dc_ripple: bool,
-    pub low_vac_out: bool,
-    pub high_vac_out: bool,
-    pub short_circuit: bool,
-    pub bms_lockout: bool,
-}
-
-fn parse_off_reason(value: &str) -> Result<OffReason, TextRecordError> {
-    Ok(match value {
-        "0X00000001" => OffReason::NoInputPower,
-        "0X00000002" => OffReason::SwitchedOffPowerSwitch,
-        "0X00000004" => OffReason::SwitchedOffDeviceModeRegister,
-        "0X00000008" => OffReason::RemoteInput,
-        "0X00000010" => OffReason::ProtectionActive,
-        "0X00000020" => OffReason::Paygo,
-        "0X00000040" => OffReason::Bms,
-        "0X00000080" => OffReason::EngineShutdownDetection,
-        "0X00000100" => OffReason::AnalyingInputVoltage,
-        _ => return Err(TextRecordError::ParseError),
-    })
-}
-
-#[derive(Debug)]
-pub enum OffReason {
-    NoInputPower,
-    SwitchedOffPowerSwitch,
-    SwitchedOffDeviceModeRegister,
-    RemoteInput,
-    ProtectionActive,
-    Paygo,
-    Bms,
-    EngineShutdownDetection,
-    AnalyingInputVoltage,
-}
-
-fn parse_error_code(value: &str) -> Result<ErrorCode, TextRecordError> {
-    Ok(match value {
-        "0" => ErrorCode::NoError,
-        "2" => ErrorCode::BatteryVoltageTooHigh,
-        "17" => ErrorCode::ChargerTemperatureTooHigh,
-        "18" => ErrorCode::ChargerOverCurrent,
-        "19" => ErrorCode::ChargerCurrentReversed,
-        "20" => ErrorCode::BulkTimeLimitExceeded,
-        "21" => ErrorCode::CurrentSensorIssue,
-        "26" => ErrorCode::TerminalsOverheated,
-        "28" => ErrorCode::ConverterIssue,
-        "33" => ErrorCode::InputVoltageTooHigh,
-        "34" => ErrorCode::InputCurrentTooHigh,
-        "38" => ErrorCode::InputShutdownBatteryVoltage,
-        "39" => ErrorCode::InputShutdownCurrentFlow,
-        "65" => ErrorCode::LostCommunication,
-        "66" => ErrorCode::SyncChargingDeviceConfigIssue,
-        "67" => ErrorCode::BmsConnectionLost,
-        "68" => ErrorCode::NetworkMisconfigured,
-        "116" => ErrorCode::FactoryCalibrationDataLost,
-        "117" => ErrorCode::InvalidFirmware,
-        "119" => ErrorCode::UserSettingsInvalid,
-        _ => return Err(TextRecordError::ParseError),
-    })
-}
-
-#[derive(Debug)]
-pub enum ErrorCode {
-    NoError,
-    BatteryVoltageTooHigh,
-    ChargerTemperatureTooHigh,
-    ChargerOverCurrent,
-    ChargerCurrentReversed,
-    BulkTimeLimitExceeded,
-    CurrentSensorIssue,
-    TerminalsOverheated,
-    ConverterIssue,
-    InputVoltageTooHigh,
-    InputCurrentTooHigh,
-    InputShutdownBatteryVoltage,
-    InputShutdownCurrentFlow,
-    LostCommunication,
-    SyncChargingDeviceConfigIssue,
-    BmsConnectionLost,
-    NetworkMisconfigured,
-    FactoryCalibrationDataLost,
-    InvalidFirmware,
-    UserSettingsInvalid,
-}
-
-fn parse_charger_status(value: &str) -> Result<ChargerStatus, TextRecordError> {
-    Ok(match value {
-        "0" => ChargerStatus::Off,
-        "1" => ChargerStatus::LowPower,
-        "2" => ChargerStatus::Fault,
-        "3" => ChargerStatus::Bulk,
-        "4" => ChargerStatus::Absorption,
-        "5" => ChargerStatus::Float,
-        "6" => ChargerStatus::Storage,
-        "7" => ChargerStatus::Equalize,
-        "9" => ChargerStatus::Inverting,
-        "11" => ChargerStatus::PowerSupply,
-        "245" => ChargerStatus::StartingUp,
-        "246" => ChargerStatus::RepeatedAbsorption,
-        "247" => ChargerStatus::AutoEqualize,
-        "248" => ChargerStatus::BatterySafe,
-        "252" => ChargerStatus::ExternalControl,
-        _ => return Err(TextRecordError::ParseError),
-    })
-}
-
-#[derive(Debug)]
-pub enum ChargerStatus {
-    Off,
-    LowPower,
-    Fault,
-    Bulk,
-    Absorption,
-    Float,
-    Storage,
-    Equalize,
-    Inverting,
-    PowerSupply,
-    StartingUp,
-    RepeatedAbsorption,
-    AutoEqualize,
-    BatterySafe,
-    ExternalControl,
 }

@@ -61,11 +61,18 @@ impl VedirectReader {
                     .map_err(VedirectError::HexRecordError)?;
 
                 match record {
-                    Some(record) => {
-                        self.state = VedirectReaderState::Idle;
-                        self.checksum = 0;
-                        Ok(Some(VedirectRecord::HexRecord(record)))
-                    }
+                    Some(record) => match self.checksum {
+                        0 => {
+                            self.state = VedirectReaderState::Idle;
+                            Ok(Some(VedirectRecord::HexRecord(record)))
+                        }
+                        _ => {
+                            self.checksum = 0;
+                            Err(VedirectError::TextRecordError(
+                                TextRecordError::ChecksumError,
+                            ))
+                        }
+                    },
                     None => {
                         self.state = VedirectReaderState::HexReader(reader);
                         Ok(None)
