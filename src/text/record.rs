@@ -2,6 +2,7 @@ use super::{
     device_mode::DeviceMode, monitor_mode::MonitorMode, mppt_mode::MpptMode, product_id::ProductId,
 };
 
+#[derive(Debug)]
 pub enum TextRecordError {
     UnknownField,
     ParseError,

@@ -97,6 +97,7 @@ pub enum VedirectRecord {
     HexRecord(HexRecord),
 }
 
+#[derive(Debug)]
 pub enum VedirectError {
     TextRecordError(TextRecordError),
     HexRecordError(HexRecordError),
