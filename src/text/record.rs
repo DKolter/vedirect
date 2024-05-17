@@ -275,15 +275,15 @@ pub struct WarningAlarmReason {
 
 fn parse_off_reason(value: &str) -> Result<OffReason, TextRecordError> {
     Ok(match value {
-        "0x00000001" => OffReason::NoInputPower,
-        "0x00000002" => OffReason::SwitchedOffPowerSwitch,
-        "0x00000004" => OffReason::SwitchedOffDeviceModeRegister,
-        "0x00000008" => OffReason::RemoteInput,
-        "0x00000010" => OffReason::ProtectionActive,
-        "0x00000020" => OffReason::Paygo,
-        "0x00000040" => OffReason::Bms,
-        "0x00000080" => OffReason::EngineShutdownDetection,
-        "0x00000100" => OffReason::AnalyingInputVoltage,
+        "0X00000001" => OffReason::NoInputPower,
+        "0X00000002" => OffReason::SwitchedOffPowerSwitch,
+        "0X00000004" => OffReason::SwitchedOffDeviceModeRegister,
+        "0X00000008" => OffReason::RemoteInput,
+        "0X00000010" => OffReason::ProtectionActive,
+        "0X00000020" => OffReason::Paygo,
+        "0X00000040" => OffReason::Bms,
+        "0X00000080" => OffReason::EngineShutdownDetection,
+        "0X00000100" => OffReason::AnalyingInputVoltage,
         _ => return Err(TextRecordError::ParseError),
     })
 }
