@@ -13,7 +13,7 @@ async fn test_ttys0() {
     loop {
         let byte = serial.read_u8().await.expect("Failed to read byte");
         if let Some(record) = reader.process_byte(byte).unwrap() {
-            println!("{:?}", record);
+            println!("{:#?}", record);
         }
     }
 }
