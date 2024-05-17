@@ -1,4 +1,4 @@
-pub use record::HexRecord;
+pub use record::{HexRecord, HexRecordError};
 
 mod record;
 
@@ -9,7 +9,7 @@ impl HexReader {
         HexReader
     }
 
-    pub fn process_byte(&mut self, _byte: u8) -> Option<HexRecord> {
-        None
+    pub fn process_byte(&mut self, _byte: u8) -> Result<Option<HexRecord>, HexRecordError> {
+        Ok(None)
     }
 }
