@@ -11,6 +11,9 @@ pub enum HexRecordError {
 
 #[derive(Debug)]
 pub enum HexRecord {
+    Done,
+    UnknownCommand,
+    Error(ErrorType),
     Ping(ApplicationVersion),
 }
 
@@ -23,6 +26,9 @@ impl HexRecord {
         }
 
         match buffer.as_slice() {
+            [1, ..] => Ok(Self::Done),
+            [3, ..] => Ok(Self::UnknownCommand),
+            [4, error_type @ .., _] => Ok(Self::Error(ErrorType::from_bytes(error_type)?)),
             [5, version @ .., _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
             _ => Err(HexRecordError::UnknownResponse),
         }
@@ -52,6 +58,22 @@ impl HexRecord {
             b'0'..=b'9' => hex - b'0',
             b'A'..=b'F' => hex - b'A' + 10,
             _ => 0,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum ErrorType {
+    FrameError,
+    BootloaderFailed,
+}
+
+impl ErrorType {
+    fn from_bytes(bytes: &[u8]) -> Result<Self, HexRecordError> {
+        match bytes {
+            [10, 10, 10, 10] => Ok(Self::FrameError),
+            [0, 0, 0, 0] => Ok(Self::BootloaderFailed),
+            _ => Err(HexRecordError::WrongFormat),
         }
     }
 }

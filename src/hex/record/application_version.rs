@@ -13,9 +13,9 @@ impl ApplicationVersion {
             return Err(HexRecordError::WrongFormat);
         }
 
-        let firmware_type = FirmwareType::from_byte(bytes[0]);
-        let major = bytes[0] & 0b0000_1111;
-        let minor = bytes[1];
+        let firmware_type = FirmwareType::from_byte(bytes[1]);
+        let major = bytes[1] & 0b0000_1111;
+        let minor = bytes[0];
 
         Ok(Self {
             firmware_type,
