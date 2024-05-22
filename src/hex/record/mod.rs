@@ -6,6 +6,7 @@ mod application_version;
 pub enum HexRecordError {
     UnknownResponse,
     CheckSumError,
+    WrongFormat,
 }
 
 #[derive(Debug)]
@@ -22,7 +23,7 @@ impl HexRecord {
         }
 
         match buffer.as_slice() {
-            [5, version @ .., _, _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
+            [5, version @ .., _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
             _ => Err(HexRecordError::UnknownResponse),
         }
     }

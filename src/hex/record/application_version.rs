@@ -10,12 +10,12 @@ pub struct ApplicationVersion {
 impl ApplicationVersion {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, HexRecordError> {
         if bytes.len() != 2 {
-            return Err(HexRecordError::UnknownResponse);
+            return Err(HexRecordError::WrongFormat);
         }
 
         let firmware_type = FirmwareType::from_byte(bytes[0]);
         let major = bytes[0] & 0b0000_1111;
-        let minor = bytes[2];
+        let minor = bytes[1];
 
         Ok(Self {
             firmware_type,
