@@ -15,34 +15,35 @@ pub enum HexRecord {
 
 impl HexRecord {
     pub fn from_bytes(buffer: &[u8]) -> Result<Self, HexRecordError> {
-        let buffer = buffer
-            .iter()
-            .copied()
-            .map(Self::hex_char_to_u8)
-            .collect::<Vec<_>>();
+        let buffer = Self::parse_ascii_hex(buffer);
 
-        if Self::calc_checksum(&buffer) != 0x55 {
+        if !Self::checksum_correct(&buffer) {
             return Err(HexRecordError::CheckSumError);
         }
 
         match buffer.as_slice() {
-            [b'5', version @ .., _, _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
+            [5, version @ .., _, _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
             _ => Err(HexRecordError::UnknownResponse),
         }
     }
 
-    fn calc_checksum(buffer: &[u8]) -> u8 {
+    fn parse_ascii_hex(buffer: &[u8]) -> Vec<u8> {
         match buffer {
-            [] => 0,
+            [] => Vec::new(),
             [command, rest @ ..] => {
-                command.wrapping_add(rest.iter().enumerate().fold(0, |acc, (i, byte)| {
-                    match i % 2 {
-                        0 => acc.wrapping_add(byte << 4),
-                        _ => acc.wrapping_add(*byte),
-                    }
-                }))
+                let mut buffer = vec![Self::hex_char_to_u8(*command)];
+                buffer.extend(rest.chunks_exact(2).map(|chunk| {
+                    let higher = Self::hex_char_to_u8(chunk[0]);
+                    let lower = Self::hex_char_to_u8(chunk[1]);
+                    (higher << 4) + lower
+                }));
+                buffer
             }
         }
+    }
+
+    fn checksum_correct(buffer: &[u8]) -> bool {
+        buffer.iter().fold(0u8, |acc, x| acc.wrapping_add(*x)) == 0x55
     }
 
     fn hex_char_to_u8(hex: u8) -> u8 {
