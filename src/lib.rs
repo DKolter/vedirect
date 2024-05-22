@@ -24,58 +24,60 @@ impl VedirectReader {
         let current_state = std::mem::take(&mut self.state);
         match current_state {
             _ if byte == b':' && !self.is_text_checksum() => {
-                println!("Switching to hex reader");
                 self.state = VedirectReaderState::HexReader(HexReader::new());
                 Ok(None)
             }
             VedirectReaderState::Idle => {
                 self.checksum = self.checksum.wrapping_add(byte);
                 if byte == b'\n' {
-                    println!("Switching to text reader");
                     self.state = VedirectReaderState::TextReader(TextReader::new());
                 }
                 Ok(None)
             }
             VedirectReaderState::TextReader(mut reader) => {
                 self.checksum = self.checksum.wrapping_add(byte);
-                let record = reader
-                    .process_byte(byte)
-                    .map_err(VedirectError::TextRecordError)?;
+                let record = reader.process_byte(byte);
 
                 match record {
-                    Some(record) => {
-                        println!("Checksum: {}", self.checksum);
+                    Ok(Some(record)) => {
                         self.state = VedirectReaderState::Idle;
-                        self.checksum = 0;
-                        Ok(Some(VedirectRecord::TextRecord(record)))
+                        match self.checksum {
+                            0 => Ok(Some(VedirectRecord::TextRecord(record))),
+                            _ => {
+                                self.checksum = 0;
+                                Err(VedirectError::TextRecordError(
+                                    TextRecordError::ChecksumError,
+                                ))
+                            }
+                        }
                     }
-                    None => {
+                    Ok(None) => {
                         self.state = VedirectReaderState::TextReader(reader);
                         Ok(None)
+                    }
+                    Err(err) => {
+                        self.state = VedirectReaderState::Idle;
+                        self.checksum = 0;
+                        Err(VedirectError::TextRecordError(err))
                     }
                 }
             }
             VedirectReaderState::HexReader(mut reader) => {
-                let record = reader
-                    .process_byte(byte)
-                    .map_err(VedirectError::HexRecordError)?;
-
+                let record = reader.process_byte(byte);
                 match record {
-                    Some(record) => match self.checksum {
-                        0 => {
-                            self.state = VedirectReaderState::Idle;
-                            Ok(Some(VedirectRecord::HexRecord(record)))
-                        }
-                        _ => {
-                            self.checksum = 0;
-                            Err(VedirectError::TextRecordError(
-                                TextRecordError::ChecksumError,
-                            ))
-                        }
-                    },
-                    None => {
+                    Ok(Some(record)) => {
+                        self.state = VedirectReaderState::Idle;
+                        self.checksum = 0;
+                        Ok(Some(VedirectRecord::HexRecord(record)))
+                    }
+                    Ok(None) => {
                         self.state = VedirectReaderState::HexReader(reader);
                         Ok(None)
+                    }
+                    Err(err) => {
+                        self.state = VedirectReaderState::Idle;
+                        self.checksum = 0;
+                        Err(VedirectError::HexRecordError(err))
                     }
                 }
             }
