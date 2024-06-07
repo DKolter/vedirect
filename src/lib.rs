@@ -1,3 +1,4 @@
+pub use hex::{BmvCommand, HexCommand, MpptCommand, PhoenixCommand};
 use hex::{HexReader, HexRecord, HexRecordError};
 use text::{TextReader, TextRecord, TextRecordError};
 

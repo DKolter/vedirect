@@ -1,5 +1,7 @@
+pub use command::{BmvCommand, HexCommand, MpptCommand, PhoenixCommand};
 pub use record::{HexRecord, HexRecordError};
 
+mod command;
 mod record;
 
 pub struct HexReader {
