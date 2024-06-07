@@ -1,4 +1,4 @@
-pub use hex::{BmvCommand, HexCommand, LoadMode, MpptCommand, PhoenixCommand};
+pub use hex::{BmvCommand, DeviceMode, HexCommand, LoadMode, MpptCommand, PhoenixCommand};
 use hex::{HexReader, HexRecord, HexRecordError};
 use text::{TextReader, TextRecord, TextRecordError};
 

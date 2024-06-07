@@ -1,6 +1,10 @@
-pub use load_mode::LoadMode;
+pub use bmv::BmvCommand;
+pub use mppt::{LoadMode, MpptCommand};
+pub use phoenix::{DeviceMode, PhoenixCommand};
 
-mod load_mode;
+mod bmv;
+mod mppt;
+mod phoenix;
 
 pub enum HexCommand {
     Ping,
@@ -9,14 +13,6 @@ pub enum HexCommand {
     BmvCommand(BmvCommand),
     PhoenixCommand(PhoenixCommand),
 }
-
-pub enum MpptCommand {
-    ChargerMode(bool),
-    LoadMode(LoadMode),
-}
-
-pub enum BmvCommand {}
-pub enum PhoenixCommand {}
 
 impl HexCommand {
     pub fn to_bytes(&self) -> Vec<u8> {
@@ -30,28 +26,7 @@ impl HexCommand {
     }
 }
 
-impl MpptCommand {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        match self {
-            MpptCommand::ChargerMode(enable) => set_command(0x0200, &[*enable as u8]),
-            MpptCommand::LoadMode(mode) => set_command(0xEDAB, mode.to_bytes()),
-        }
-    }
-}
-
-impl BmvCommand {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        vec![]
-    }
-}
-
-impl PhoenixCommand {
-    pub fn to_bytes(&self) -> Vec<u8> {
-        vec![]
-    }
-}
-
-fn set_command(register: u16, value: &[u8]) -> Vec<u8> {
+pub fn set_command(register: u16, value: &[u8]) -> Vec<u8> {
     let mut command = vec![b':', b'8'];
     let mut checksum = 8u8;
     command.push(u8_to_hex_char(((register & 0x00F0) >> 4) as u8));
