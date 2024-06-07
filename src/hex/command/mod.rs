@@ -1,3 +1,7 @@
+use load_mode::LoadMode;
+
+mod load_mode;
+
 pub enum HexCommand {
     Ping,
     Restart,
@@ -8,7 +12,7 @@ pub enum HexCommand {
 
 pub enum MpptCommand {
     ChargerMode(bool),
-    LoadMode(bool),
+    LoadMode(LoadMode),
 }
 
 pub enum BmvCommand {}
@@ -30,20 +34,20 @@ impl MpptCommand {
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
             MpptCommand::ChargerMode(enable) => set_command(0x0200, &[*enable as u8]),
-            MpptCommand::LoadMode(enable) => set_command(0xEDA8, &[*enable as u8]),
+            MpptCommand::LoadMode(mode) => set_command(0xEDA8, mode.to_bytes()),
         }
     }
 }
 
 impl BmvCommand {
     pub fn to_bytes(&self) -> Vec<u8> {
-        todo!()
+        vec![]
     }
 }
 
 impl PhoenixCommand {
     pub fn to_bytes(&self) -> Vec<u8> {
-        todo!()
+        vec![]
     }
 }
 
