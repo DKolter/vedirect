@@ -17,8 +17,8 @@ pub enum PhoenixCommand {}
 impl HexCommand {
     pub fn to_bytes(&self) -> Vec<u8> {
         match self {
-            HexCommand::Ping => ":154".as_bytes().to_vec(),
-            HexCommand::Restart => ":64F".as_bytes().to_vec(),
+            HexCommand::Ping => ":154\n".as_bytes().to_vec(),
+            HexCommand::Restart => ":64F\n".as_bytes().to_vec(),
             HexCommand::MpptCommand(mppt) => mppt.to_bytes(),
             HexCommand::BmvCommand(bmv) => bmv.to_bytes(),
             HexCommand::PhoenixCommand(phoenix) => phoenix.to_bytes(),
@@ -68,6 +68,7 @@ fn set_command(register: u16, value: &[u8]) -> Vec<u8> {
     checksum = 0x55u8.wrapping_sub(checksum);
     command.push(u8_to_hex_char(checksum >> 4));
     command.push(u8_to_hex_char(checksum & 0x0F));
+    command.push(b'\n');
 
     command
 }
