@@ -8,7 +8,7 @@ mod set_response;
 
 #[derive(Debug)]
 pub enum HexRecordError {
-    CheckSumError,
+    CheckSumError(String),
     WrongFormat,
 }
 
@@ -26,7 +26,9 @@ impl HexRecord {
         let buffer = Self::parse_ascii_hex(buffer);
 
         if !Self::checksum_correct(&buffer) {
-            return Err(HexRecordError::CheckSumError);
+            return Err(HexRecordError::CheckSumError(
+                String::from_utf8_lossy(&buffer).to_string(),
+            ));
         }
 
         match buffer.as_slice() {
