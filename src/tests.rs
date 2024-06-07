@@ -18,8 +18,10 @@ async fn test_ttys0() {
     let mut reader = VedirectReader::new();
     loop {
         let byte = serial.read_u8().await.expect("Failed to read byte");
-        if let Some(record) = reader.process_byte(byte).unwrap() {
-            println!("{:#?}", record);
+        match reader.process_byte(byte) {
+            Ok(Some(record)) => println!("{:?}", record),
+            Err(err) => eprintln!("{:?}", err),
+            _ => {}
         }
     }
 }
