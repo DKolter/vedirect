@@ -1,7 +1,7 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio_serial::SerialPortBuilderExt;
 
-use crate::{HexCommand, MpptCommand, VedirectReader};
+use crate::{HexCommand, LoadMode, MpptCommand, VedirectReader};
 
 #[tokio::test]
 async fn test_ttys0() {
@@ -9,7 +9,7 @@ async fn test_ttys0() {
         .open_native_async()
         .expect("Failed to open serial port");
 
-    let command = HexCommand::MpptCommand(MpptCommand::ChargerMode(true));
+    let command = HexCommand::MpptCommand(MpptCommand::LoadMode(LoadMode::Auto));
     serial
         .write(&command.to_bytes())
         .await

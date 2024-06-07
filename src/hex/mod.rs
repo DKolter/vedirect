@@ -1,4 +1,4 @@
-pub use command::{BmvCommand, HexCommand, MpptCommand, PhoenixCommand};
+pub use command::{BmvCommand, HexCommand, MpptCommand, PhoenixCommand, LoadMode};
 pub use record::{HexRecord, HexRecordError};
 
 mod command;

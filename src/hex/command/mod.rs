@@ -1,4 +1,4 @@
-use load_mode::LoadMode;
+pub use load_mode::LoadMode;
 
 mod load_mode;
 
