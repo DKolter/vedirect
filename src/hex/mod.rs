@@ -15,7 +15,7 @@ impl HexReader {
 
     pub fn process_byte(&mut self, byte: u8) -> Result<Option<HexRecord>, HexRecordError> {
         match byte {
-            b'\n' => Ok(Some(HexRecord::from_bytes(&self.buffer)?)),
+            b'\n' => Ok(HexRecord::from_bytes(&self.buffer)?),
             b'\r' => Ok(None),
             byte => {
                 self.buffer.push(byte);
