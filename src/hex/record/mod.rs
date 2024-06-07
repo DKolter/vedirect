@@ -8,8 +8,9 @@ mod set_response;
 
 #[derive(Debug)]
 pub enum HexRecordError {
-    CheckSumError(String),
+    CheckSumError,
     WrongFormat,
+    UnknownResponse,
 }
 
 #[derive(Debug)]
@@ -22,22 +23,20 @@ pub enum HexRecord {
 }
 
 impl HexRecord {
-    pub fn from_bytes(buffer: &[u8]) -> Result<Option<Self>, HexRecordError> {
+    pub fn from_bytes(buffer: &[u8]) -> Result<Self, HexRecordError> {
         let buffer = Self::parse_ascii_hex(buffer);
 
         if !Self::checksum_correct(&buffer) {
-            return Err(HexRecordError::CheckSumError(
-                String::from_utf8_lossy(&buffer).to_string(),
-            ));
+            return Err(HexRecordError::CheckSumError);
         }
 
         match buffer.as_slice() {
-            [1, ..] => Ok(Some(Self::Done)),
-            [3, ..] => Ok(Some(Self::UnknownCommand)),
-            [4, error_type @ .., _] => Ok(Some(Self::Error(ErrorType::from_bytes(error_type)?))),
-            [5, version @ .., _] => Ok(Some(Self::Ping(ApplicationVersion::from_bytes(version)?))),
-            [8, data @ .., _] => Ok(Some(Self::SetResponse(SetResponse::from_bytes(data)?))),
-            _ => Ok(None),
+            [1, ..] => Ok(Self::Done),
+            [3, ..] => Ok(Self::UnknownCommand),
+            [4, error_type @ .., _] => Ok(Self::Error(ErrorType::from_bytes(error_type)?)),
+            [5, version @ .., _] => Ok(Self::Ping(ApplicationVersion::from_bytes(version)?)),
+            [8, data @ .., _] => Ok(Self::SetResponse(SetResponse::from_bytes(data)?)),
+            _ => Err(HexRecordError::UnknownResponse),
         }
     }
 
