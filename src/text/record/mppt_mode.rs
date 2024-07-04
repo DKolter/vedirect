@@ -1,6 +1,6 @@
 use super::TextRecordError;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum MpptMode {
     Off,
     VoltageOrCurrentLimited,

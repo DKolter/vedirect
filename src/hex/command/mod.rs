@@ -1,6 +1,6 @@
 pub use bmv::BmvCommand;
 pub use mppt::{LoadMode, MpptCommand};
-pub use phoenix::{DeviceMode, PhoenixCommand};
+pub use phoenix::{PhoenixDeviceMode, PhoenixCommand};
 
 mod bmv;
 mod mppt;

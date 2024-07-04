@@ -1,11 +1,11 @@
-use charger_status::ChargerStatus;
-use device_mode::DeviceMode;
-use error_code::ErrorCode;
-use monitor_mode::MonitorMode;
-use mppt_mode::MpptMode;
-use off_reason::OffReason;
-use product_id::ProductId;
-use warning_alarm_reason::WarningAlarmReason;
+pub use charger_status::ChargerStatus;
+pub use device_mode::DeviceMode;
+pub use error_code::ErrorCode;
+pub use monitor_mode::MonitorMode;
+pub use mppt_mode::MpptMode;
+pub use off_reason::OffReason;
+pub use product_id::ProductId;
+pub use warning_alarm_reason::WarningAlarmReason;
 
 mod charger_status;
 mod device_mode;
@@ -26,131 +26,131 @@ pub enum TextRecordError {
 #[derive(Debug, Default)]
 pub struct TextRecord {
     /// Main or channel 1 (battery) voltage in mV
-    v: Option<i32>,
+    pub v: Option<i32>,
     /// Channel 2 (battery) voltage in mV
-    v2: Option<i32>,
+    pub v2: Option<i32>,
     /// Channel 3 (battery) voltage in mV
-    v3: Option<i32>,
+    pub v3: Option<i32>,
     /// Auxiliary (starter) voltage in mV
-    vs: Option<i32>,
+    pub vs: Option<i32>,
     /// Mid-point voltage of the battery bank in mV
-    vm: Option<i32>,
+    pub vm: Option<i32>,
     /// Mid-point deviation of the battery bank in percentage
-    dm: Option<i32>,
+    pub dm: Option<i32>,
     /// Panel voltage in mV
-    vpv: Option<i32>,
+    pub vpv: Option<i32>,
     /// Panel power in W
-    ppv: Option<i32>,
+    pub ppv: Option<i32>,
     /// Main or channel 1 battery current in mA
-    i: Option<i32>,
+    pub i: Option<i32>,
     /// Channel 2 battery current in mA
-    i2: Option<i32>,
+    pub i2: Option<i32>,
     /// Channel 3 battery current in mA
-    i3: Option<i32>,
+    pub i3: Option<i32>,
     /// Load current in mA
-    il: Option<i32>,
+    pub il: Option<i32>,
     /// Load output state (ON = true, OFF = false)
-    load: Option<bool>,
+    pub load: Option<bool>,
     /// Battery temperature in degrees Celsius
-    t: Option<i32>,
+    pub t: Option<i32>,
     /// Instantaneous power in W
-    p: Option<i32>,
+    pub p: Option<i32>,
     /// Consumed amphours in mAh
-    ce: Option<i32>,
+    pub ce: Option<i32>,
     /// State of charge
-    soc: Option<i32>,
+    pub soc: Option<i32>,
     /// Time to go in minutes
-    ttg: Option<i32>,
+    pub ttg: Option<i32>,
     /// Alarm condition active (ON = true, OFF = false)
-    alarm: Option<bool>,
+    pub alarm: Option<bool>,
     /// Relay state
-    relay: Option<bool>,
+    pub relay: Option<bool>,
     /// Alarm reason
-    ar: Option<WarningAlarmReason>,
+    pub ar: Option<WarningAlarmReason>,
     /// Off reason
-    or: Option<OffReason>,
+    pub or: Option<OffReason>,
     /// Depth of the deepest discharge in mAh
-    h1: Option<i32>,
+    pub h1: Option<i32>,
     /// Depth of the last discharge in mAh
-    h2: Option<i32>,
+    pub h2: Option<i32>,
     /// Depth of the average discharge in mAh
-    h3: Option<i32>,
+    pub h3: Option<i32>,
     /// Number of charge cycles
-    h4: Option<i32>,
+    pub h4: Option<i32>,
     /// Number of full discharges
-    h5: Option<i32>,
+    pub h5: Option<i32>,
     /// Cumulative amp hours drawn in mAh
-    h6: Option<i32>,
+    pub h6: Option<i32>,
     /// Minimum main (battery) voltage in mV
-    h7: Option<i32>,
+    pub h7: Option<i32>,
     /// Maximum main (battery) voltage in mV
-    h8: Option<i32>,
+    pub h8: Option<i32>,
     /// Number of seconds since last full charge
-    h9: Option<i32>,
+    pub h9: Option<i32>,
     /// Number of automatic synchronizations
-    h10: Option<i32>,
+    pub h10: Option<i32>,
     /// Number of low main voltage alarms
-    h11: Option<i32>,
+    pub h11: Option<i32>,
     /// Number of high main voltage alarms
-    h12: Option<i32>,
+    pub h12: Option<i32>,
     /// Number of low auxiliary voltage alarms
-    h13: Option<i32>,
+    pub h13: Option<i32>,
     /// Number of high auxiliary voltage alarms
-    h14: Option<i32>,
+    pub h14: Option<i32>,
     /// Minimum auxiliary (battery) voltage in mV
-    h15: Option<i32>,
+    pub h15: Option<i32>,
     /// Maximum auxiliary (battery) voltage in mV
-    h16: Option<i32>,
+    pub h16: Option<i32>,
     /// Amount of discharged energy (BMV) / Amount of charged energy (DC monitor) in 0.01 kWh
-    h17: Option<i32>,
+    pub h17: Option<i32>,
     /// Amount of charged energy (BMV) / Amount of consumed energy (DC monitor) in 0.01 kWh
-    h18: Option<i32>,
+    pub h18: Option<i32>,
     /// Yield total (user resettable counter) in 0.01 kWh
-    h19: Option<i32>,
+    pub h19: Option<i32>,
     /// Yield today in 0.01 kWh
-    h20: Option<i32>,
+    pub h20: Option<i32>,
     /// Maximum power today in W
-    h21: Option<i32>,
+    pub h21: Option<i32>,
     /// Yield yesterday in 0.01 kWh
-    h22: Option<i32>,
+    pub h22: Option<i32>,
     /// Maximum power yesterday in W
-    h23: Option<i32>,
+    pub h23: Option<i32>,
     /// Error code
-    err: Option<ErrorCode>,
+    pub err: Option<ErrorCode>,
     ///  State of operation
-    cs: Option<ChargerStatus>,
+    pub cs: Option<ChargerStatus>,
     /// Model description
-    bmv: Option<String>,
+    pub bmv: Option<String>,
     /// Firmware version (16 bit)
-    fw: Option<String>,
+    pub fw: Option<String>,
     /// Firmware version (24 bit)
-    fwe: Option<String>,
+    pub fwe: Option<String>,
     /// Product ID
-    pid: Option<ProductId>,
+    pub pid: Option<ProductId>,
     /// Serial number
-    ser: Option<String>,
+    pub ser: Option<String>,
     /// Day sequence number
-    hsds: Option<i32>,
+    pub hsds: Option<i32>,
     /// Device mode
-    mode: Option<DeviceMode>,
+    pub mode: Option<DeviceMode>,
     /// AC output voltage in 0.01 kWh
-    ac_out_v: Option<i32>,
+    pub ac_out_v: Option<i32>,
     /// AC output current in 0.1 A
-    ac_out_i: Option<i32>,
+    pub ac_out_i: Option<i32>,
     /// AC output apparent power in VA
-    ac_out_s: Option<i32>,
+    pub ac_out_s: Option<i32>,
     /// Warning reason
-    warn: Option<WarningAlarmReason>,
+    pub warn: Option<WarningAlarmReason>,
     /// Tracker operation mode
-    mppt: Option<MpptMode>,
+    pub mppt: Option<MpptMode>,
     /// DC monitor mode
-    mon: Option<MonitorMode>,
+    pub mon: Option<MonitorMode>,
     // DC input voltage in 0.01V
-    dc_in_v: Option<i32>,
+    pub dc_in_v: Option<i32>,
     // DC input current in 0.1A
-    dc_in_i: Option<i32>,
+    pub dc_in_i: Option<i32>,
     // DC input power in W
-    dc_in_p: Option<i32>,
+    pub dc_in_p: Option<i32>,
 }
 
 impl TextRecord {

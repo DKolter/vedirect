@@ -1,6 +1,6 @@
 use super::TextRecordError;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct WarningAlarmReason {
     pub low_voltage: bool,
     pub high_voltage: bool,

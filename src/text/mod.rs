@@ -1,6 +1,12 @@
-pub use record::{TextRecord, TextRecordError};
+pub use record::{
+    ChargerStatus, DeviceMode, ErrorCode, MonitorMode, MpptMode, OffReason, ProductId, TextRecord,
+    TextRecordError, WarningAlarmReason,
+};
 
 mod record;
+
+#[cfg(test)]
+mod tests;
 
 pub struct TextReader {
     state: TextReaderState,

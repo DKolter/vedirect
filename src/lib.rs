@@ -1,6 +1,13 @@
-pub use hex::{BmvCommand, DeviceMode, HexCommand, LoadMode, MpptCommand, PhoenixCommand};
-use hex::{HexReader, HexRecord, HexRecordError};
-use text::{TextReader, TextRecord, TextRecordError};
+use hex::HexReader;
+pub use hex::{
+    BmvCommand, HexCommand, HexRecord, HexRecordError, LoadMode, MpptCommand, PhoenixCommand,
+    PhoenixDeviceMode,
+};
+use text::TextReader;
+pub use text::{
+    ChargerStatus, DeviceMode, ErrorCode, MonitorMode, MpptMode, OffReason, ProductId, TextRecord,
+    TextRecordError, WarningAlarmReason,
+};
 
 mod hex;
 mod text;

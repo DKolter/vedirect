@@ -1,10 +1,10 @@
 use super::set_command;
-pub use device_mode::DeviceMode;
+pub use device_mode::PhoenixDeviceMode;
 
 mod device_mode;
 
 pub enum PhoenixCommand {
-    DeviceMode(DeviceMode),
+    DeviceMode(PhoenixDeviceMode),
 }
 
 impl PhoenixCommand {
